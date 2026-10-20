@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site Words Game</title>
+<style>
+  body{margin:0;font-family:"Comic Sans MS","Chalkboard SE",sans-serif;background:linear-gradient(#a0e7ff,#ffd6f6);min-height:100vh;text-align:center;color:#4b2e83}
+  h1{margin:16px 0 4px;font-size:2.2rem}
+  #stars{font-size:1.8rem;min-height:2.2rem}
+  #prompt{font-size:1.4rem;margin:8px}
+  #big{font-size:4rem;font-weight:bold;margin:8px;min-height:5rem}
+  button{font:inherit;cursor:pointer;border:none;border-radius:20px;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+  #choices{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;padding:12px}
+  .choice{font-size:2.4rem;padding:18px 28px;background:#fff;color:#4b2e83;min-width:140px}
+  .choice:hover{background:#fff7b0}
+  .choice.wrong{background:#ffb3b3;animation:shake .4s}
+  .choice.right{background:#a8f5a8}
+  #hear,#modeBtn{font-size:1.3rem;padding:12px 22px;background:#ffcf33;margin:6px}
+  #msg{font-size:1.8rem;min-height:2.4rem;font-weight:bold}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .conf{position:fixed;top:-20px;font-size:2rem;animation:fall 2s linear forwards;pointer-events:none}
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+</style>
+</head>
+<body>
+<h1>⭐ Site Words ⭐</h1>
+<div id="stars"></div>
+<div id="prompt"></div>
+<div id="big"></div>
+<button id="hear">🔊 Hear the word</button>
+<button id="modeBtn">Mode: Look &amp; Find</button>
+<div id="msg"></div>
+<div id="choices"></div>
+<script>
+const WORDS=["the","and","a","to","said","you","he","she","we","me","be","see","like","look","go","is","it","in","my","can","come","for","have","are","was","they","one","what","do","with","little","play","big","here","up","down","that","this","not","on"];
+let target,score=0,streak=0,mode="look",lastWord="";
+const $=id=>document.getElementById(id);
+function speak(t){
+  if(!("speechSynthesis" in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);u.rate=.8;u.pitch=1.2;speechSynthesis.speak(u);
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function confetti(){
+  const e=["🎉","⭐","🌈","🦄","🎈","💖"];
+  for(let i=0;i<25;i++){
+    const s=document.createElement("div");s.className="conf";
+    s.textContent=e[i%e.length];s.style.left=Math.random()*100+"vw";
+    s.style.animationDelay=Math.random()*.6+"s";
+    document.body.appendChild(s);setTimeout(()=>s.remove(),3000);
+  }
+}
+function round(){
+  do{target=WORDS[Math.floor(Math.random()*WORDS.length)]}while(target===lastWord);
+  lastWord=target;
+  const opts=shuffle([target,...shuffle(WORDS.filter(w=>w!==target)).slice(0,3)]);
+  $("msg").textContent="";
+  if(mode==="look"){
+    $("prompt").textContent="Can you find this word?";
+    $("big").textContent=target;
+  }else{
+    $("prompt").textContent="Listen and find the word!";
+    $("big").textContent="👂";
+  }
+  const c=$("choices");c.innerHTML="";
+  opts.forEach(w=>{
+    const b=document.createElement("button");
+    b.className="choice";b.textContent=w;
+    b.onclick=()=>pick(b,w);c.appendChild(b);
+  });
+  speak(target);
+}
+function pick(b,w){
+  if(w===target){
+    b.classList.add("right");score++;streak++;
+    $("stars").textContent="⭐".repeat(Math.min(score,20));
+    $("msg").textContent=["Great job!","You did it!","Awesome!","Super reader!"][Math.floor(Math.random()*4)];
+    speak("Yes! "+target);confetti();
+    document.querySelectorAll(".choice").forEach(x=>x.disabled=true);
+    setTimeout(round,1800);
+  }else{
+    streak=0;b.classList.add("wrong");$("msg").textContent="Try again!";
+    speak("Try again");setTimeout(()=>b.classList.remove("wrong"),500);
+  }
+}
+$("hear").onclick=()=>speak(target);
+$("modeBtn").onclick=()=>{
+  mode=mode==="look"?"listen":"look";
+  $("modeBtn").textContent="Mode: "+(mode==="look"?"Look & Find":"Listen & Find");
+  round();
+};
+round();
+</script>
+</body>
+</html>
