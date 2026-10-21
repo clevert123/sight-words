@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site Words Game</title>
+<style>
+  body{margin:0;font-family:"Comic Sans MS","Chalkboard SE",sans-serif;background:linear-gradient(#a0e7ff,#ffd6f6);min-height:100vh;text-align:center;color:#4b2e83}
+  h1{margin:16px 0 4px;font-size:2.2rem}
+  #score{font-size:1.8rem}
+  #avail{font-size:1.4rem;min-height:2rem}
+  #spelled{font-size:3rem;letter-spacing:.3rem;min-height:3.5rem;color:#2a9d2a}
+  .letter{min-width:70px;padding:14px 20px}
+  .choice:disabled{opacity:.6;cursor:default}
+  #prompt{font-size:1.4rem;margin:8px}
+  #big{font-size:4rem;font-weight:bold;margin:8px;min-height:5rem}
+  button{font:inherit;cursor:pointer;border:none;border-radius:20px;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+  #choices{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;padding:12px}
+  .choice{font-size:2.4rem;padding:18px 28px;background:#fff;color:#4b2e83;min-width:140px}
+  .choice:hover{background:#fff7b0}
+  .choice.wrong{background:#ffb3b3;animation:shake .4s}
+  .choice.right{background:#a8f5a8}
+  #hear,#modeBtn{font-size:1.3rem;padding:12px 22px;background:#ffcf33;margin:6px}
+  #msg{font-size:1.8rem;min-height:2.4rem;font-weight:bold}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .conf{position:fixed;top:-20px;font-size:2rem;animation:fall 2s linear forwards;pointer-events:none}
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+</style>
+</head>
+<body>
+<h1>⭐ Site Words ⭐</h1>
+<div id="score"></div>
+<div id="avail"></div>
+<div id="prompt"></div>
+<div id="big"></div>
+<div id="spelled"></div>
+<button id="hear">🔊 Hear the word</button>
+<button id="modeBtn">Mode: Look &amp; Find</button>
+<div id="msg"></div>
+<div id="choices"></div>
+<script>
+const WORDS=["the","and","a","to","said","you","he","she","we","me","be","see","like","look","go","is","it","in","my","can","come","for","have","are","was","they","one","what","do","with","little","play","big","here","up","down","that","this","not","on"];
+const MODES=["look","listen","spell"];
+const MODE_NAMES={look:"Look & Find",listen:"Listen & Find",spell:"Spell It"};
+const MAX_POINTS=3;
+let target,score=0,mode="look",lastWord="",available=MAX_POINTS,locked=false,spellPos=0;
+const $=id=>document.getElementById(id);
+function speak(t){
+  if(!("speechSynthesis" in window))return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);u.rate=.8;u.pitch=1.2;speechSynthesis.speak(u);
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function confetti(){
+  const e=["🎉","⭐","🌈","🦄","🎈","💖"];
+  for(let i=0;i<25;i++){
+    const s=document.createElement("div");s.className="conf";
+    s.textContent=e[i%e.length];s.style.left=Math.random()*100+"vw";
+    s.style.animationDelay=Math.random()*.6+"s";
+    document.body.appendChild(s);setTimeout(()=>s.remove(),3000);
+  }
+}
+function showPoints(){
+  $("score").textContent="Points: "+score;
+  $("avail").textContent="This word is worth: "+"⭐".repeat(available)+"☆".repeat(MAX_POINTS-available);
+}
+function wrong(b){
+  if(available>0)available--;
+  showPoints();
+  b.classList.add("wrong");
+  $("msg").textContent=available>0?"Try again!":"Keep trying - no points left on this one";
+  speak("Try again");
+  setTimeout(()=>b.classList.remove("wrong"),500);
+}
+function win(){
+  locked=true;
+  score+=available;showPoints();
+  $("msg").textContent=(available===MAX_POINTS?"Perfect! ":"You did it! ")+"+"+available;
+  speak("Yes! "+target);
+  if(available>0)confetti();
+  setTimeout(round,2000);
+}
+function round(){
+  do{target=WORDS[Math.floor(Math.random()*WORDS.length)]}while(target===lastWord);
+  lastWord=target;locked=false;spellPos=0;available=MAX_POINTS;
+  showPoints();
+  $("msg").textContent="";
+  const c=$("choices");c.innerHTML="";
+  if(mode==="spell"){
+    $("prompt").textContent="Spell the word! Tap the letters in order.";
+    $("big").textContent=target;
+    $("spelled").textContent="";
+    const letters=shuffle(target.split("").map((l,i)=>({l,i})));
+    letters.forEach(o=>{
+      const b=document.createElement("button");
+      b.className="choice letter";b.textContent=o.l;
+      b.onclick=()=>pickLetter(b,o.l);c.appendChild(b);
+    });
+    // hide the word after a short peek so she has to remember it
+    setTimeout(()=>{if(mode==="spell"&&target&&!locked)$("big").textContent="👂"},2500);
+  }else{
+    $("spelled").textContent="";
+    $("prompt").textContent=mode==="look"?"Can you find this word?":"Listen and find the word!";
+    $("big").textContent=mode==="look"?target:"👂";
+    shuffle([target,...shuffle(WORDS.filter(w=>w!==target)).slice(0,3)]).forEach(w=>{
+      const b=document.createElement("button");
+      b.className="choice";b.textContent=w;
+      b.onclick=()=>pick(b,w);c.appendChild(b);
+    });
+  }
+  speak(target);
+}
+function pick(b,w){
+  if(locked||b.disabled)return;
+  if(w===target){b.classList.add("right");win()}
+  else{b.disabled=true;wrong(b)}
+}
+function pickLetter(b,l){
+  if(locked||b.disabled)return;
+  if(l===target[spellPos]){
+    b.disabled=true;b.classList.add("right");spellPos++;
+    $("spelled").textContent=target.slice(0,spellPos);
+    if(spellPos===target.length){$("big").textContent=target;win()}
+  }else wrong(b);
+}
+$("hear").onclick=()=>speak(target);
+$("modeBtn").onclick=()=>{
+  mode=MODES[(MODES.indexOf(mode)+1)%MODES.length];
+  $("modeBtn").textContent="Mode: "+MODE_NAMES[mode];
+  round();
+};
+round();
+</script>
+</body>
+</html>
