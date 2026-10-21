@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Site Words Game</title>
+<title>Sight Words Game</title>
 <style>
   body{display:flow-root;margin:0;font-family:"Comic Sans MS","Chalkboard SE",sans-serif;background:linear-gradient(#a0e7ff,#ffd6f6);min-height:100vh;text-align:center;color:#4b2e83}
   .screen[hidden]{display:none}
@@ -58,7 +58,7 @@
 </head>
 <body>
 <section id="startScreen" class="screen">
-<h1>⭐ Site Words ⭐</h1>
+<h1>⭐ Sight Words ⭐</h1>
 <p>Choose a word list</p>
 <div id="listChoices">
   <button id="thisWeekButton" class="menu-button">This week's words</button>
@@ -66,7 +66,7 @@
 </div>
 </section>
 <section id="gameScreen" class="screen" hidden>
-<h1>⭐ Site Words ⭐</h1>
+<h1>⭐ Sight Words ⭐</h1>
 <div id="score"></div>
 <div id="roundCount"></div>
 <div id="avail"></div>
@@ -82,7 +82,7 @@
   <div id="resultScore"></div>
   <div id="resultActions">
     <button id="playAgainButton" class="result-button">Play Again</button>
-    <button id="chooseWordsButton" class="result-button">Choose Words</button>
+    <button id="chooseWordsButton" class="result-button">Main Menu</button>
   </div>
 </section>
 <script>
@@ -91,8 +91,8 @@ const PREVIOUS_WORDS=["the","and","a","to","said","you","he","she","we","me","be
 const PRACTICE_WORDS=[...new Set([...PREVIOUS_WORDS,...THIS_WEEKS_WORDS])];
 const MODES=["look","listen","spell"];
 const MAX_POINTS=3;
-const TOTAL_ROUNDS=20;
-let target,score=0,mode="look",lastWord="",available=MAX_POINTS,locked=false,spellPos=0,speechTimer;
+const TOTAL_ROUNDS=10;
+let target,score=0,mode="look",available=MAX_POINTS,locked=false,spellPos=0,speechTimer,lastWord="",wordRepeatCount=0;
 let activeWords=THIS_WEEKS_WORDS,selectedWords=THIS_WEEKS_WORDS,roundsCompleted=0;
 const $=id=>document.getElementById(id);
 let audioContext;
@@ -156,7 +156,79 @@ function playWinSound(){
     });
   });
 }
+function playResultWinSound(){
+  const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContextClass)return;
+  audioContext??=new AudioContextClass();
+  audioContext.resume().then(()=>{
+    const harmonics=new Float32Array([0,1,.48,.24,.13,.07,.035]);
+    const wave=audioContext.createPeriodicWave(new Float32Array(harmonics.length),harmonics);
+    const notes=[
+      {frequency:196,duration:.34,delay:0},
+      {frequency:261.63,duration:.34,delay:.25},
+      {frequency:329.63,duration:.74,delay:.5}
+    ];
+    const start=audioContext.currentTime;
+    notes.forEach(note=>{
+      const oscillator=audioContext.createOscillator();
+      const volume=audioContext.createGain();
+      const noteStart=start+note.delay;
+      oscillator.setPeriodicWave(wave);
+      oscillator.frequency.setValueAtTime(note.frequency,noteStart);
+      oscillator.frequency.exponentialRampToValueAtTime(note.frequency*.985,noteStart+note.duration);
+      volume.gain.setValueAtTime(.001,noteStart);
+      volume.gain.exponentialRampToValueAtTime(.09,noteStart+.035);
+      volume.gain.exponentialRampToValueAtTime(.001,noteStart+note.duration);
+      oscillator.connect(volume);
+      volume.connect(audioContext.destination);
+      oscillator.start(noteStart);
+      oscillator.stop(noteStart+note.duration+.02);
+    });
+  });
+}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function playLoseSound(){
+  const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContextClass)return;
+  audioContext??=new AudioContextClass();
+  audioContext.resume().then(()=>{
+    const harmonics=new Float32Array([0,1,.85,.62,.43,.3,.2,.13,.08,.05]);
+    const wave=audioContext.createPeriodicWave(new Float32Array(harmonics.length),harmonics);
+    const phrase=[
+      {frequency:87.31,duration:.24,pause:.12,fall:.9,volume:.11},
+      {frequency:73.42,duration:.19,pause:.04,fall:.84,volume:.12},
+      {frequency:77.78,duration:.13,pause:.15,fall:.86,volume:.1},
+      {frequency:65.41,duration:.28,pause:.05,fall:.78,volume:.12},
+      {frequency:55,duration:1,pause:.05,fall:.68,volume:.14}
+    ];
+    let start=audioContext.currentTime+.03;
+    phrase.forEach(note=>{
+      [1,2].forEach((octave,index)=>{
+        const oscillator=audioContext.createOscillator();
+        const volume=audioContext.createGain();
+        oscillator.setPeriodicWave(wave);
+        oscillator.frequency.setValueAtTime(note.frequency*octave,start);
+        oscillator.frequency.exponentialRampToValueAtTime(note.frequency*octave*note.fall,start+note.duration);
+        volume.gain.setValueAtTime(.001,start);
+        volume.gain.exponentialRampToValueAtTime(note.volume/(index+1),start+.025);
+        volume.gain.exponentialRampToValueAtTime(.001,start+note.duration);
+        oscillator.connect(volume);
+        volume.connect(audioContext.destination);
+        oscillator.start(start);
+        oscillator.stop(start+note.duration+.02);
+      });
+      start+=note.duration+note.pause;
+    });
+  });
+}
+function randomItem(items){return items[Math.floor(Math.random()*items.length)]}
+function nextWord(){
+  const alternatives=wordRepeatCount>=2?activeWords.filter(word=>word!==lastWord):activeWords;
+  const word=randomItem(alternatives.length?alternatives:activeWords);
+  wordRepeatCount=word===lastWord?wordRepeatCount+1:1;
+  lastWord=word;
+  return word;
+}
 function confetti(count=25){
   const e=["🎉","⭐","🌈","🦄","🎈","💖"];
   for(let i=0;i<count;i++){
@@ -203,29 +275,49 @@ function showPoints(){
   $("roundCount").textContent="Round "+Math.min(roundsCompleted+1,TOTAL_ROUNDS)+" of "+TOTAL_ROUNDS;
   $("avail").textContent="This word is worth: "+"⭐".repeat(available)+"☆".repeat(MAX_POINTS-available);
 }
+const feedbackTimers=new WeakMap();
+function flashFeedback(button,className){
+  clearTimeout(feedbackTimers.get(button));
+  button.classList.remove("right","wrong");
+  void button.offsetWidth;
+  button.classList.add(className);
+  feedbackTimers.set(button,setTimeout(()=>{
+    button.classList.remove(className);
+    feedbackTimers.delete(button);
+  },500));
+}
 function wrong(b){
-  if(available>0)available--;
+  if(locked)return;
+  available=Math.max(0,available-1);
+  if(available===0){locked=true;roundsCompleted++}
   showPoints();
-  b.classList.add("wrong");
-  $("msg").textContent=available>0?"Try again!":"Keep trying - no points left on this one";
-  speak("Try again");
-  setTimeout(()=>b.classList.remove("wrong"),500);
+  flashFeedback(b,"wrong");
+  if(available===0){
+    $("msg").textContent="Next word!";
+    advanceRound(600);
+  }else{
+    $("msg").textContent="Try again!";
+    speak("Try again");
+  }
+}
+function advanceRound(delay){
+  setTimeout(()=>{
+    if(roundsCompleted>=TOTAL_ROUNDS){finishGame();return}
+    mode=randomItem(MODES);
+    round();
+  },delay);
 }
 function win(){
   locked=true;
   score+=available;roundsCompleted++;showPoints();
   $("msg").textContent=(available===MAX_POINTS?"Perfect! ":"You did it! ")+"+"+available;
   playWinSound();
-  setTimeout(()=>{
-    if(roundsCompleted===TOTAL_ROUNDS){finishGame();return}
-    mode=MODES[(MODES.indexOf(mode)+1)%MODES.length];
-    round();
-  },2000);
+  advanceRound(2000);
 }
 function startGame(words){
   activeWords=words;
   selectedWords=words;
-  score=0;roundsCompleted=0;mode="look";lastWord="";available=MAX_POINTS;locked=false;
+  score=0;roundsCompleted=0;mode=randomItem(MODES);available=MAX_POINTS;locked=false;lastWord="";wordRepeatCount=0;
   $("startScreen").hidden=true;
   $("resultsScreen").hidden=true;
   $("gameScreen").hidden=false;
@@ -240,10 +332,11 @@ function finishGame(){
   $("resultTitle").textContent=perfect?"PERFECT!":percent>=80?"You Win!":"You Lose, Try Again";
   $("resultScore").textContent="Final score: "+score+" / "+maximumScore+" ("+percent+"%)";
   if(perfect){confetti(140);playCelebrationSound()}
+  else if(percent>=80)playResultWinSound();
+  else playLoseSound();
 }
 function round(){
-  do{target=activeWords[Math.floor(Math.random()*activeWords.length)]}while(target===lastWord);
-  lastWord=target;locked=false;spellPos=0;available=MAX_POINTS;
+  target=nextWord();locked=false;spellPos=0;available=MAX_POINTS;
   showPoints();
   $("msg").textContent="";
   const c=$("choices");c.innerHTML="";
@@ -277,13 +370,13 @@ function round(){
 }
 function pick(b,w){
   if(locked||b.disabled)return;
-  if(w===target){b.classList.add("right");win()}
+  if(w===target){flashFeedback(b,"right");win()}
   else{b.disabled=true;wrong(b)}
 }
 function pickLetter(button,letter){
   if(locked)return;
   if(letter===target[spellPos]){
-    button.classList.add("right");
+    flashFeedback(button,"right");
     spellPos++;
     $("spelled").textContent=target.slice(0,spellPos);
     if(spellPos===target.length)win();
