@@ -5,13 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Site Words Game</title>
 <style>
-  body{margin:0;font-family:"Comic Sans MS","Chalkboard SE",sans-serif;background:linear-gradient(#a0e7ff,#ffd6f6);min-height:100vh;text-align:center;color:#4b2e83}
+  body{display:flow-root;margin:0;font-family:"Comic Sans MS","Chalkboard SE",sans-serif;background:linear-gradient(#a0e7ff,#ffd6f6);min-height:100vh;text-align:center;color:#4b2e83}
+  .screen[hidden]{display:none}
   h1{margin:16px 0 4px;font-size:2.2rem}
+  #startScreen,#resultsScreen{padding:8px 14px}
+  #listChoices,#resultActions{display:grid;gap:14px;width:min(100%,480px);margin:26px auto}
+  .menu-button,.result-button{box-sizing:border-box;width:100%;min-width:0;padding:18px 14px;background:#fff;color:#4b2e83;font-size:1.5rem}
+  #roundCount{font-size:1.1rem;min-height:1.5rem}
+  #resultTitle{margin:24px 0 12px;font-size:2.5rem}
+  #resultScore{font-size:1.6rem}
   #score{font-size:1.8rem}
   #avail{font-size:1.4rem;min-height:2rem}
   #spelled{font-size:3rem;letter-spacing:.3rem;min-height:3.5rem;color:#2a9d2a}
-  .letter{min-width:70px;padding:14px 20px}
   .choice:disabled{opacity:.6;cursor:default}
+  .letter{box-sizing:border-box;width:100%;min-width:0;padding:10px 0;aspect-ratio:1}
   #prompt{font-size:1.4rem;margin:8px}
   #big{font-size:4rem;font-weight:bold;margin:8px;min-height:5rem}
   button{font:inherit;cursor:pointer;border:none;border-radius:20px;box-shadow:0 5px 0 rgba(0,0,0,.2)}
@@ -20,7 +27,29 @@
   .choice:hover{background:#fff7b0}
   .choice.wrong{background:#ffb3b3;animation:shake .4s}
   .choice.right{background:#a8f5a8}
-  #hear,#modeBtn{font-size:1.3rem;padding:12px 22px;background:#ffcf33;margin:6px}
+  #hear{font-size:1.3rem;padding:12px 22px;background:#ffcf33;margin:6px}
+  #choices.spell-keyboard{display:grid;grid-template-columns:repeat(7,minmax(44px,1fr));gap:8px;max-width:640px;margin:0 auto}
+  #choices.spell-keyboard .letter{min-width:0;font-size:1.8rem;padding:10px 0}
+  @media(max-width:400px){#choices.spell-keyboard{grid-template-columns:repeat(7,minmax(44px,1fr));gap:6px}}
+  @media(max-width:374px){#choices.spell-keyboard{grid-template-columns:repeat(6,minmax(44px,1fr));gap:4px}}
+  @media(max-width:430px){
+    #listChoices,#resultActions{gap:10px;margin:18px auto}
+    .menu-button,.result-button{padding:14px 12px;font-size:1.3rem}
+    #choices:not(.spell-keyboard){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:480px;margin:0 auto}
+    #choices:not(.spell-keyboard) .choice{box-sizing:border-box;width:100%;min-width:0;font-size:1.65rem;padding:12px 8px}
+  }
+  @media(max-width:430px) and (max-height:760px){
+    h1{margin:8px 0 0;font-size:1.8rem}
+    #score{font-size:1.35rem}
+    #avail{font-size:1.05rem;min-height:1.5rem}
+    #prompt{font-size:1.1rem;margin:4px}
+    #big{font-size:3rem;margin:4px;min-height:3.5rem}
+    #spelled{font-size:2.3rem;min-height:2.5rem}
+    #hear{font-size:1.1rem;padding:8px 16px;margin:4px}
+    #msg{font-size:1.3rem;min-height:1.8rem}
+    #choices.spell-keyboard{gap:4px;padding:8px 12px}
+    #choices.spell-keyboard .letter{font-size:1.35rem;padding:4px 0}
+  }
   #msg{font-size:1.8rem;min-height:2.4rem;font-weight:bold}
   @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
   .conf{position:fixed;top:-20px;font-size:2rem;animation:fall 2s linear forwards;pointer-events:none}
@@ -28,40 +57,150 @@
 </style>
 </head>
 <body>
+<section id="startScreen" class="screen">
+<h1>⭐ Site Words ⭐</h1>
+<p>Choose a word list</p>
+<div id="listChoices">
+  <button id="thisWeekButton" class="menu-button">This week's words</button>
+  <button id="practiceButton" class="menu-button">Practice words</button>
+</div>
+</section>
+<section id="gameScreen" class="screen" hidden>
 <h1>⭐ Site Words ⭐</h1>
 <div id="score"></div>
+<div id="roundCount"></div>
 <div id="avail"></div>
 <div id="prompt"></div>
 <div id="big"></div>
 <div id="spelled"></div>
 <button id="hear">🔊 Hear the word</button>
-<button id="modeBtn">Mode: Look &amp; Find</button>
 <div id="msg"></div>
 <div id="choices"></div>
+</section>
+<section id="resultsScreen" class="screen" hidden>
+  <h1 id="resultTitle"></h1>
+  <div id="resultScore"></div>
+  <div id="resultActions">
+    <button id="playAgainButton" class="result-button">Play Again</button>
+    <button id="chooseWordsButton" class="result-button">Choose Words</button>
+  </div>
+</section>
 <script>
-const WORDS=["the","and","a","to","said","you","he","she","we","me","be","see","like","look","go","is","it","in","my","can","come","for","have","are","was","they","one","what","do","with","little","play","big","here","up","down","that","this","not","on"];
+const THIS_WEEKS_WORDS=["all","four","are","down","not"];
+const PREVIOUS_WORDS=["the","and","a","to","said","you","he","she","we","me","be","see","like","look","go","is","it","in","my","can","come","for","have","are","was","they","one","what","do","with","little","play","big","here","up","down","that","this","not","on"];
+const PRACTICE_WORDS=[...new Set([...PREVIOUS_WORDS,...THIS_WEEKS_WORDS])];
 const MODES=["look","listen","spell"];
-const MODE_NAMES={look:"Look & Find",listen:"Listen & Find",spell:"Spell It"};
 const MAX_POINTS=3;
-let target,score=0,mode="look",lastWord="",available=MAX_POINTS,locked=false,spellPos=0;
+const TOTAL_ROUNDS=20;
+let target,score=0,mode="look",lastWord="",available=MAX_POINTS,locked=false,spellPos=0,speechTimer;
+let activeWords=THIS_WEEKS_WORDS,selectedWords=THIS_WEEKS_WORDS,roundsCompleted=0;
 const $=id=>document.getElementById(id);
-function speak(t){
-  if(!("speechSynthesis" in window))return;
+let audioContext;
+const audioClips=new Map();
+let currentAudio;
+function speakWithSystemVoice(text) {
+  if (!("speechSynthesis" in window)) return;
+
+  const voices = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
+  const voice =
+    voices.find(v => /zira/i.test(v.name)) ||
+    voices.find(v => /\b(aria|jenny|samantha|victoria|susan|hazel|sonia|libby|karen|moira|tessa|ava)\b/i.test(v.name)) ||
+    voices.find(v => /^en-US/i.test(v.lang)) ||
+    voices[0];
+
   speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(t);u.rate=.8;u.pitch=1.2;speechSynthesis.speak(u);
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  if (voice) utterance.voice = voice;
+  utterance.rate = 0.65;
+  utterance.pitch = 0.90;
+  utterance.volume = 0.8;
+  speechSynthesis.speak(utterance);
+}
+function speak(text){
+  if("speechSynthesis" in window)speechSynthesis.cancel();
+  if(currentAudio){currentAudio.pause();currentAudio.currentTime=0}
+  const clipPath=text==="Try again"
+    ?"audio/ava/phrases/try-again.mp3"
+    :`audio/ava/words/${encodeURIComponent(text.toLowerCase())}.mp3`;
+  let audio=audioClips.get(clipPath);
+  if(!audio){audio=new Audio(clipPath);audio.preload="auto";audioClips.set(clipPath,audio)}
+  currentAudio=audio;
+  audio.currentTime=0;
+  audio.play().catch(()=>{
+    if(currentAudio===audio){currentAudio=null;speakWithSystemVoice(text)}
+  });
+}
+function playWinSound(){
+  const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContextClass)return;
+  audioContext??=new AudioContextClass();
+  audioContext.resume().then(()=>{
+    const harmonics=new Float32Array([0,1,.7,.45,.28,.16,.1,.06]);
+    const wave=audioContext.createPeriodicWave(new Float32Array(harmonics.length),harmonics);
+    const notes=[523.25,659.25,783.99,1046.5];
+    const start=audioContext.currentTime;
+    notes.forEach((frequency,index)=>{
+      const oscillator=audioContext.createOscillator();
+      const volume=audioContext.createGain();
+      const noteStart=start+index*.14;
+      oscillator.setPeriodicWave(wave);
+      oscillator.frequency.value=frequency;
+      volume.gain.setValueAtTime(.001,noteStart);
+      volume.gain.exponentialRampToValueAtTime(.12,noteStart+.025);
+      volume.gain.exponentialRampToValueAtTime(.001,noteStart+.24);
+      oscillator.connect(volume);
+      volume.connect(audioContext.destination);
+      oscillator.start(noteStart);
+      oscillator.stop(noteStart+.25);
+    });
+  });
 }
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function confetti(){
+function confetti(count=25){
   const e=["🎉","⭐","🌈","🦄","🎈","💖"];
-  for(let i=0;i<25;i++){
+  for(let i=0;i<count;i++){
     const s=document.createElement("div");s.className="conf";
     s.textContent=e[i%e.length];s.style.left=Math.random()*100+"vw";
     s.style.animationDelay=Math.random()*.6+"s";
     document.body.appendChild(s);setTimeout(()=>s.remove(),3000);
   }
 }
+function playCelebrationSound(){
+  const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContextClass)return;
+  audioContext??=new AudioContextClass();
+  audioContext.resume().then(()=>{
+    const harmonics=new Float32Array([0,1,.7,.45,.28,.16,.1,.06]);
+    const wave=audioContext.createPeriodicWave(new Float32Array(harmonics.length),harmonics);
+    const chords=[
+      {notes:[261.63,329.63,392],duration:.48},
+      {notes:[349.23,440,523.25],duration:.48},
+      {notes:[392,493.88,587.33],duration:.48},
+      {notes:[523.25,659.25,783.99,1046.5],duration:1.05}
+    ];
+    let offset=audioContext.currentTime;
+    for(const chord of chords){
+      for(const frequency of chord.notes){
+        const oscillator=audioContext.createOscillator();
+        const volume=audioContext.createGain();
+        oscillator.setPeriodicWave(wave);
+        oscillator.frequency.value=frequency;
+        volume.gain.setValueAtTime(.001,offset);
+        volume.gain.exponentialRampToValueAtTime(.045,offset+.035);
+        volume.gain.exponentialRampToValueAtTime(.001,offset+chord.duration);
+        oscillator.connect(volume);
+        volume.connect(audioContext.destination);
+        oscillator.start(offset);
+        oscillator.stop(offset+chord.duration+.02);
+      }
+      offset+=chord.duration+.08;
+    }
+  });
+}
 function showPoints(){
   $("score").textContent="Points: "+score;
+  $("roundCount").textContent="Round "+Math.min(roundsCompleted+1,TOTAL_ROUNDS)+" of "+TOTAL_ROUNDS;
   $("avail").textContent="This word is worth: "+"⭐".repeat(available)+"☆".repeat(MAX_POINTS-available);
 }
 function wrong(b){
@@ -74,62 +213,90 @@ function wrong(b){
 }
 function win(){
   locked=true;
-  score+=available;showPoints();
+  score+=available;roundsCompleted++;showPoints();
   $("msg").textContent=(available===MAX_POINTS?"Perfect! ":"You did it! ")+"+"+available;
-  speak("Yes! "+target);
-  if(available>0)confetti();
-  setTimeout(round,2000);
+  playWinSound();
+  setTimeout(()=>{
+    if(roundsCompleted===TOTAL_ROUNDS){finishGame();return}
+    mode=MODES[(MODES.indexOf(mode)+1)%MODES.length];
+    round();
+  },2000);
+}
+function startGame(words){
+  activeWords=words;
+  selectedWords=words;
+  score=0;roundsCompleted=0;mode="look";lastWord="";available=MAX_POINTS;locked=false;
+  $("startScreen").hidden=true;
+  $("resultsScreen").hidden=true;
+  $("gameScreen").hidden=false;
+  round();
+}
+function finishGame(){
+  const maximumScore=TOTAL_ROUNDS*MAX_POINTS;
+  const percent=Math.round(score/maximumScore*100);
+  const perfect=score===maximumScore;
+  $("gameScreen").hidden=true;
+  $("resultsScreen").hidden=false;
+  $("resultTitle").textContent=perfect?"PERFECT!":percent>=80?"You Win!":"You Lose, Try Again";
+  $("resultScore").textContent="Final score: "+score+" / "+maximumScore+" ("+percent+"%)";
+  if(perfect){confetti(140);playCelebrationSound()}
 }
 function round(){
-  do{target=WORDS[Math.floor(Math.random()*WORDS.length)]}while(target===lastWord);
+  do{target=activeWords[Math.floor(Math.random()*activeWords.length)]}while(target===lastWord);
   lastWord=target;locked=false;spellPos=0;available=MAX_POINTS;
   showPoints();
   $("msg").textContent="";
   const c=$("choices");c.innerHTML="";
+  c.classList.toggle("spell-keyboard",mode==="spell");
   if(mode==="spell"){
-    $("prompt").textContent="Spell the word! Tap the letters in order.";
-    $("big").textContent=target;
+    $("prompt").textContent="Listen to the word, then tap its letters.";
+    $("big").textContent="👂";
     $("spelled").textContent="";
-    const letters=shuffle(target.split("").map((l,i)=>({l,i})));
-    letters.forEach(o=>{
-      const b=document.createElement("button");
-      b.className="choice letter";b.textContent=o.l;
-      b.onclick=()=>pickLetter(b,o.l);c.appendChild(b);
+    "abcdefghijklmnopqrstuvwxyz".split("").forEach(letter=>{
+      const button=document.createElement("button");
+      button.className="choice letter";
+      button.textContent=letter;
+      button.onclick=()=>pickLetter(button,letter);
+      c.appendChild(button);
     });
-    // hide the word after a short peek so she has to remember it
-    setTimeout(()=>{if(mode==="spell"&&target&&!locked)$("big").textContent="👂"},2500);
   }else{
     $("spelled").textContent="";
     $("prompt").textContent=mode==="look"?"Can you find this word?":"Listen and find the word!";
     $("big").textContent=mode==="look"?target:"👂";
-    shuffle([target,...shuffle(WORDS.filter(w=>w!==target)).slice(0,3)]).forEach(w=>{
+    shuffle([target,...shuffle(activeWords.filter(w=>w!==target)).slice(0,3)]).forEach(w=>{
       const b=document.createElement("button");
       b.className="choice";b.textContent=w;
       b.onclick=()=>pick(b,w);c.appendChild(b);
     });
   }
-  speak(target);
+  clearTimeout(speechTimer);
+  const wordToSpeak=target;
+  speechTimer=setTimeout(()=>{
+    if(target===wordToSpeak)speak(wordToSpeak);
+  },500);
 }
 function pick(b,w){
   if(locked||b.disabled)return;
   if(w===target){b.classList.add("right");win()}
   else{b.disabled=true;wrong(b)}
 }
-function pickLetter(b,l){
-  if(locked||b.disabled)return;
-  if(l===target[spellPos]){
-    b.disabled=true;b.classList.add("right");spellPos++;
+function pickLetter(button,letter){
+  if(locked)return;
+  if(letter===target[spellPos]){
+    button.classList.add("right");
+    spellPos++;
     $("spelled").textContent=target.slice(0,spellPos);
-    if(spellPos===target.length){$("big").textContent=target;win()}
-  }else wrong(b);
+    if(spellPos===target.length)win();
+  }else wrong(button);
 }
-$("hear").onclick=()=>speak(target);
-$("modeBtn").onclick=()=>{
-  mode=MODES[(MODES.indexOf(mode)+1)%MODES.length];
-  $("modeBtn").textContent="Mode: "+MODE_NAMES[mode];
-  round();
+$('hear').onclick=()=>{clearTimeout(speechTimer);speak(target)};
+$("thisWeekButton").onclick=()=>startGame(THIS_WEEKS_WORDS);
+$("practiceButton").onclick=()=>startGame(PRACTICE_WORDS);
+$("playAgainButton").onclick=()=>startGame(selectedWords);
+$("chooseWordsButton").onclick=()=>{
+  $("resultsScreen").hidden=true;
+  $("startScreen").hidden=false;
 };
-round();
 </script>
 </body>
 </html>
