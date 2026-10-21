@@ -11,6 +11,9 @@
   #startScreen,#resultsScreen{padding:8px 14px}
   #listChoices,#resultActions{display:grid;gap:14px;width:min(100%,480px);margin:26px auto}
   .menu-button,.result-button{box-sizing:border-box;width:100%;min-width:0;padding:18px 14px;background:#fff;color:#4b2e83;font-size:1.5rem}
+  #weekWordsPreview{margin:18px auto 0}
+  #weekWordsPreview h2{margin:0 0 8px;font-size:1.25rem}
+  #thisWeekWords{display:grid;gap:4px;margin:0;padding:0;list-style:none;font-size:1.15rem}
   #roundCount{font-size:1.1rem;min-height:1.5rem}
   #resultTitle{margin:24px 0 12px;font-size:2.5rem}
   #resultScore{font-size:1.6rem}
@@ -62,7 +65,11 @@
 <p>Choose a word list</p>
 <div id="listChoices">
   <button id="thisWeekButton" class="menu-button">This week's words</button>
-  <button id="practiceButton" class="menu-button">Practice words</button>
+  <button id="practiceButton" class="menu-button">Practice all words</button>
+</div>
+<div id="weekWordsPreview">
+  <h2>This week's words:</h2>
+  <ul id="thisWeekWords"></ul>
 </div>
 </section>
 <section id="gameScreen" class="screen" hidden>
@@ -95,6 +102,11 @@ const TOTAL_ROUNDS=10;
 let target,score=0,mode="look",available=MAX_POINTS,locked=false,spellPos=0,speechTimer,lastWord="",wordRepeatCount=0;
 let activeWords=THIS_WEEKS_WORDS,selectedWords=THIS_WEEKS_WORDS,roundsCompleted=0;
 const $=id=>document.getElementById(id);
+THIS_WEEKS_WORDS.forEach(word=>{
+  const item=document.createElement("li");
+  item.textContent=word;
+  $("thisWeekWords").appendChild(item);
+});
 let audioContext;
 const audioClips=new Map();
 let currentAudio;
@@ -229,11 +241,10 @@ function nextWord(){
   lastWord=word;
   return word;
 }
-function confetti(count=25){
-  const e=["🎉","⭐","🌈","🦄","🎈","💖"];
+function confetti(count=25,symbols=["🎉","⭐","🌈","🦄","🎈","💖"]){
   for(let i=0;i<count;i++){
     const s=document.createElement("div");s.className="conf";
-    s.textContent=e[i%e.length];s.style.left=Math.random()*100+"vw";
+    s.textContent=symbols[i%symbols.length];s.style.left=Math.random()*100+"vw";
     s.style.animationDelay=Math.random()*.6+"s";
     document.body.appendChild(s);setTimeout(()=>s.remove(),3000);
   }
@@ -321,7 +332,7 @@ function startGame(words){
   $("startScreen").hidden=true;
   $("resultsScreen").hidden=true;
   $("gameScreen").hidden=false;
-  round();
+  round(true);
 }
 function finishGame(){
   const maximumScore=TOTAL_ROUNDS*MAX_POINTS;
@@ -331,11 +342,11 @@ function finishGame(){
   $("resultsScreen").hidden=false;
   $("resultTitle").textContent=perfect?"PERFECT!":percent>=80?"You Win!":"You Lose, Try Again";
   $("resultScore").textContent="Final score: "+score+" / "+maximumScore+" ("+percent+"%)";
-  if(perfect){confetti(140);playCelebrationSound()}
-  else if(percent>=80)playResultWinSound();
-  else playLoseSound();
+  if(perfect){confetti(280);playCelebrationSound()}
+  else if(percent>=80){confetti(score);playResultWinSound()}
+  else{confetti(score,["😞","😢","🙁"]);playLoseSound()}
 }
-function round(){
+function round(speakImmediately=false){
   target=nextWord();locked=false;spellPos=0;available=MAX_POINTS;
   showPoints();
   $("msg").textContent="";
@@ -364,6 +375,10 @@ function round(){
   }
   clearTimeout(speechTimer);
   const wordToSpeak=target;
+  if(speakImmediately){
+    speakWithSystemVoice(wordToSpeak);
+    return;
+  }
   speechTimer=setTimeout(()=>{
     if(target===wordToSpeak)speak(wordToSpeak);
   },500);
