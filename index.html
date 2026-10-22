@@ -11,19 +11,43 @@
   #startScreen,#resultsScreen{padding:8px 14px}
   #listChoices,#resultActions{display:grid;gap:14px;width:min(100%,480px);margin:26px auto}
   .menu-button,.result-button{box-sizing:border-box;width:100%;min-width:0;padding:18px 14px;background:#fff;color:#4b2e83;font-size:1.5rem}
+  #thisWeekButton{background:#1f7a3a;color:#fff;font-weight:bold}
+  #thisWeekButton:not(:disabled):hover{background:#17632d}
   #weekWordsPreview{margin:18px auto 0}
   #weekWordsPreview h2{margin:0 0 8px;font-size:1.25rem}
   #thisWeekWords{display:grid;gap:4px;margin:0;padding:0;list-style:none;font-size:1.15rem}
   #roundCount{font-size:1.1rem;min-height:1.5rem}
   #resultTitle{margin:24px 0 12px;font-size:2.5rem}
+  #resultTitle.perfect{font-size:3.2rem}
+  .wave-letter{display:inline-block;color:hsl(var(--hue),90%,50%);animation:letter-wave .7s ease-in-out infinite,letter-rainbow 1.2s linear infinite;animation-delay:calc(var(--i) * -.09s),calc(var(--i) * -.15s)}
+  @keyframes letter-wave{0%,100%{transform:translateY(0)}50%{transform:translateY(-.25em)}}
+  @keyframes letter-rainbow{to{filter:hue-rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){.wave-letter{animation:none}}
   #resultScore{font-size:1.6rem}
+  #hangmanStatus{font-size:1.15rem;margin:8px}
+  #hangmanDrawing{display:block;width:min(220px,62vw);height:210px;margin:0 auto}
+  #hangmanDrawing .scaffold,#hangmanDrawing .hangman-part{fill:none;stroke:#4b2e83;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+  #hangmanDrawing .hangman-part{visibility:hidden}
+  #hangmanDrawing .hangman-face{fill:#4b2e83;stroke:none}
+  #hangmanWord{display:flex;justify-content:center;gap:6px;min-height:3rem;margin:8px}
+  .hangman-slot{min-width:25px;border-bottom:3px solid #4b2e83;font-size:2rem;text-transform:uppercase}
+  #hangmanMessage{min-height:2rem;font-size:1.3rem;font-weight:bold}
+  #hangmanKeyboard{display:grid;grid-template-columns:repeat(7,minmax(38px,1fr));gap:6px;max-width:580px;margin:8px auto;padding:8px 12px}
+  .hangman-letter{box-sizing:border-box;min-width:0;min-height:44px;padding:8px 0;background:#fff;color:#4b2e83;font-size:1.3rem}
+  .hangman-letter.correct{background:#a8f5a8}
+  .hangman-letter.incorrect{background:#ffb3b3}
+  #hangmanActions{display:flex;justify-content:center;gap:12px;margin:12px}
+  #hangmanActions[hidden]{display:none}
+  #hangmanActions .result-button{width:auto;flex:1;max-width:220px}
   #score{font-size:1.8rem}
   #avail{font-size:1.4rem;min-height:2rem}
   #spelled{font-size:3rem;letter-spacing:.3rem;min-height:3.5rem;color:#2a9d2a}
-  .choice:disabled{opacity:.6;cursor:default}
+  #spelled.spell-answer{box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:min(440px,calc(100% - 32px));min-height:4.25rem;margin:10px auto 14px;padding:6px 12px;border:3px dashed #1f7a3a;border-radius:8px;background:#fff}
+  .choice:disabled,.menu-button:disabled{opacity:.6;cursor:default}
   .letter{box-sizing:border-box;width:100%;min-width:0;padding:10px 0;aspect-ratio:1}
   #prompt{font-size:1.4rem;margin:8px}
   #big{font-size:4rem;font-weight:bold;margin:8px;min-height:5rem}
+  #big.replay{width:fit-content;margin-left:auto;margin-right:auto;padding:0 .3em;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
   button{font:inherit;cursor:pointer;border:none;border-radius:20px;box-shadow:0 5px 0 rgba(0,0,0,.2)}
   #choices{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;padding:12px}
   .choice{font-size:2.4rem;padding:18px 28px;background:#fff;color:#4b2e83;min-width:140px}
@@ -38,6 +62,8 @@
   @media(max-width:430px){
     #listChoices,#resultActions{gap:10px;margin:18px auto}
     .menu-button,.result-button{padding:14px 12px;font-size:1.3rem}
+    #hangmanKeyboard{grid-template-columns:repeat(7,minmax(36px,1fr));gap:4px;padding:8px 4px}
+    .hangman-letter{font-size:1.15rem}
     #choices:not(.spell-keyboard){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:480px;margin:0 auto}
     #choices:not(.spell-keyboard) .choice{box-sizing:border-box;width:100%;min-width:0;font-size:1.65rem;padding:12px 8px}
   }
@@ -50,13 +76,22 @@
     #spelled{font-size:2.3rem;min-height:2.5rem}
     #hear{font-size:1.1rem;padding:8px 16px;margin:4px}
     #msg{font-size:1.3rem;min-height:1.8rem}
+    #hangmanDrawing{width:150px;height:155px}
+    #hangmanWord{margin:4px;min-height:2.5rem}
+    .hangman-slot{font-size:1.7rem}
     #choices.spell-keyboard{gap:4px;padding:8px 12px}
     #choices.spell-keyboard .letter{font-size:1.35rem;padding:4px 0}
   }
   #msg{font-size:1.8rem;min-height:2.4rem;font-weight:bold}
   @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
   .conf{position:fixed;top:-20px;font-size:2rem;animation:fall 2s linear forwards;pointer-events:none}
+  .conf.bottom-burst{top:auto;bottom:-24px;animation:burst-from-bottom 2.2s ease-out forwards}
   @keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+  @keyframes burst-from-bottom{
+    0%{opacity:0;transform:translate(-50%,0) scale(.35) rotate(0)}
+    12%{opacity:1;transform:translate(-50%,0) scale(1)}
+    100%{opacity:0;transform:translate(calc(-50% + var(--burst-drift)),calc(-1 * var(--burst-rise))) scale(.8) rotate(620deg)}
+  }
 </style>
 </head>
 <body>
@@ -64,13 +99,40 @@
 <h1>⭐ Sight Words ⭐</h1>
 <p>Choose a word list</p>
 <div id="listChoices">
-  <button id="thisWeekButton" class="menu-button">This week's words</button>
+  <button id="thisWeekButton" class="menu-button">This Week's Words</button>
   <button id="practiceButton" class="menu-button">Practice all words</button>
+  <button id="hangmanButton" class="menu-button">Sight Word Hangman</button>
 </div>
 <div id="weekWordsPreview">
-  <h2>This week's words:</h2>
+  <h2 id="weekWordsTitle">This week's words:</h2>
   <ul id="thisWeekWords"></ul>
 </div>
+</section>
+<section id="hangmanScreen" class="screen" hidden>
+  <h1>Sight Word Hangman</h1>
+  <div id="hangmanStatus"></div>
+  <svg id="hangmanDrawing" viewBox="0 0 220 240" role="img" aria-label="Hangman drawing">
+    <title>Hangman drawing</title>
+    <g class="scaffold">
+      <path d="M25 220h150M55 220V20h105v25M35 220h40" />
+    </g>
+    <circle id="hangmanPart1" class="hangman-part" cx="160" cy="62" r="18" />
+    <path id="hangmanPart2" class="hangman-part" d="M160 80v55" />
+    <path id="hangmanPart3" class="hangman-part" d="m160 95-28 24" />
+    <path id="hangmanPart4" class="hangman-part" d="m160 95 28 24" />
+    <path id="hangmanPart5" class="hangman-part" d="m160 135-25 34" />
+    <path id="hangmanPart6" class="hangman-part" d="m160 135 25 34" />
+    <circle id="hangmanPart7" class="hangman-part hangman-face" cx="153" cy="57" r="2.5" />
+    <circle id="hangmanPart8" class="hangman-part hangman-face" cx="167" cy="57" r="2.5" />
+    <path id="hangmanPart9" class="hangman-part" d="M153 69q7 8 14 0" stroke-width="4" />
+  </svg>
+  <div id="hangmanWord" aria-label="Word to guess"></div>
+  <div id="hangmanMessage" aria-live="polite"></div>
+  <div id="hangmanKeyboard" aria-label="Letter keyboard"></div>
+  <div id="hangmanActions" hidden>
+    <button id="hangmanAgain" class="result-button">Play Again</button>
+    <button id="hangmanBack" class="result-button">Main Menu</button>
+  </div>
 </section>
 <section id="gameScreen" class="screen" hidden>
 <h1>⭐ Sight Words ⭐</h1>
@@ -79,7 +141,7 @@
 <div id="avail"></div>
 <div id="prompt"></div>
 <div id="big"></div>
-<div id="spelled"></div>
+<div id="spelled" aria-live="polite" aria-label="Word being spelled"></div>
 <button id="hear">🔊 Hear the word</button>
 <div id="msg"></div>
 <div id="choices"></div>
@@ -93,21 +155,81 @@
   </div>
 </section>
 <script>
-const THIS_WEEKS_WORDS=["all","four","are","down","not"];
-const PREVIOUS_WORDS=["the","and","a","to","said","you","he","she","we","me","be","see","like","look","go","is","it","in","my","can","come","for","have","are","was","they","one","what","do","with","little","play","big","here","up","down","that","this","not","on"];
-const PRACTICE_WORDS=[...new Set([...PREVIOUS_WORDS,...THIS_WEEKS_WORDS])];
+const WEEK_ONE_START_DATE="2026-09-07";
+const SIGHT_WORD_WEEKS=[
+  ["up","we","a","and","go"],
+  ["i","in","the","to","you"],
+  ["for","red","yellow","he","too"],
+  ["look","one","jump","me","see"],
+  ["my","it","can","is","at"],
+  ["come","into","like","big","blue"],
+  ["all","four","are","down","not"],
+  ["she","little","run","said","do"],
+  ["be","so","two","play","am"],
+  ["no","on","out","an","eat"],
+  ["black","did","get","away","help"],
+  ["but","have","by","stop","that"],
+  ["going","make","yes","fly","here"],
+  ["three","this","will","of","brown"],
+  ["some","they","had","then","was"],
+  ["his","who","ran","old","good"],
+  ["there","has","him","them","six"],
+  ["find","over","came","funny","our"],
+  ["where","off","your","her","call"],
+  ["what","with","just","put","from"],
+  ["its","well","went","as","give"],
+  ["know","when","saw","soon","green"],
+  ["or","now","ride","say","new"],
+  ["under","ask","live","hot","sit"],
+  ["ten","got","let","take","ate"],
+  ["could","how","may","walk","were"],
+  ["if","must","after","don't","please"],
+  ["cold","pretty","five","why","fall"],
+  ["seven","sing","sleep","us","about"],
+  ["white","want","been","made","open"],
+  ["their","very","would","today","cut"],
+  ["eight","keep","every","pick","round"],
+  ["buy","think","does","around","pull"],
+  ["because","read","before","best","any"],
+  ["thank","first","right","tell","which"],
+  ["work","only","always","fast","try"],
+  ["gave","wish","hold","long","small"],
+  ["again","much","never","these","upon"],
+  ["warm","those","wash","done","light"],
+  ["goes","many","use","show","write"],
+  ["draw","drink","better","bring","carry"],
+  ["clean","laugh","myself","shall","together"],
+  ["far","full","grow","hurt","kind"],
+  ["own","start","once","both","found"]
+];
+function getCurrentWeekNumber(){
+  const [year,month,day]=WEEK_ONE_START_DATE.split("-").map(Number);
+  const firstDay=Date.UTC(year,month-1,day);
+  const today=new Date();
+  const todayStart=Date.UTC(today.getFullYear(),today.getMonth(),today.getDate());
+  return Math.max(1,Math.floor((todayStart-firstDay)/604800000)+1);
+}
+const CURRENT_WEEK_NUMBER=getCurrentWeekNumber();
+const CURRENT_WEEK_WORDS=SIGHT_WORD_WEEKS[CURRENT_WEEK_NUMBER-1]||[];
+const PRACTICE_WORDS=[...new Set(SIGHT_WORD_WEEKS.slice(0,CURRENT_WEEK_NUMBER).flat())];
 const MODES=["look","listen","spell"];
 const MAX_POINTS=3;
 const TOTAL_ROUNDS=10;
+const HANGMAN_MAX_MISTAKES=9;
 let target,score=0,mode="look",available=MAX_POINTS,locked=false,spellPos=0,speechTimer,lastWord="",wordRepeatCount=0;
-let activeWords=THIS_WEEKS_WORDS,selectedWords=THIS_WEEKS_WORDS,roundsCompleted=0;
+let activeWords=CURRENT_WEEK_WORDS,selectedWords=CURRENT_WEEK_WORDS,roundsCompleted=0;
+let hangmanTarget="",hangmanWrongGuesses=0,hangmanGuessedLetters=new Set(),hangmanFinished=false,lastHangmanTarget="";
 const $=id=>document.getElementById(id);
-THIS_WEEKS_WORDS.forEach(word=>{
+$("weekWordsTitle").textContent="Week "+CURRENT_WEEK_NUMBER+" words:";
+$("thisWeekButton").disabled=CURRENT_WEEK_WORDS.length===0;
+$("hangmanButton").disabled=CURRENT_WEEK_WORDS.length===0;
+CURRENT_WEEK_WORDS.forEach(word=>{
   const item=document.createElement("li");
   item.textContent=word;
   $("thisWeekWords").appendChild(item);
 });
 let audioContext;
+const USE_GENERATED_AUDIO=true;
 const audioClips=new Map();
 let currentAudio;
 function speakWithSystemVoice(text) {
@@ -130,6 +252,10 @@ function speakWithSystemVoice(text) {
   speechSynthesis.speak(utterance);
 }
 function speak(text){
+  if(!USE_GENERATED_AUDIO){
+    speakWithSystemVoice(text);
+    return;
+  }
   if("speechSynthesis" in window)speechSynthesis.cancel();
   if(currentAudio){currentAudio.pause();currentAudio.currentTime=0}
   const clipPath=text==="Try again"
@@ -249,6 +375,23 @@ function confetti(count=25,symbols=["🎉","⭐","🌈","🦄","🎈","💖"]){
     document.body.appendChild(s);setTimeout(()=>s.remove(),3000);
   }
 }
+function bottomConfettiBursts(){
+  const symbols=["🎉","⭐","🌈","🎈","💖","✨"];
+  const origins=[22,50,78];
+  origins.forEach((origin,burst)=>{
+    for(let i=0;i<32;i++){
+      const particle=document.createElement("div");
+      particle.className="conf bottom-burst";
+      particle.textContent=symbols[(i+burst)%symbols.length];
+      particle.style.left=(origin+(Math.random()-.5)*8)+"vw";
+      particle.style.setProperty("--burst-drift",((Math.random()-.5)*70)+"vw");
+      particle.style.setProperty("--burst-rise",(45+Math.random()*35)+"vh");
+      particle.style.animationDelay=(burst*.42)+"s";
+      document.body.appendChild(particle);
+      setTimeout(()=>particle.remove(),2600+burst*420);
+    }
+  });
+}
 function playCelebrationSound(){
   const AudioContextClass=window.AudioContext||window.webkitAudioContext;
   if(!AudioContextClass)return;
@@ -283,7 +426,6 @@ function playCelebrationSound(){
 }
 function showPoints(){
   $("score").textContent="Points: "+score;
-  $("roundCount").textContent="Round "+Math.min(roundsCompleted+1,TOTAL_ROUNDS)+" of "+TOTAL_ROUNDS;
   $("avail").textContent="This word is worth: "+"⭐".repeat(available)+"☆".repeat(MAX_POINTS-available);
 }
 const feedbackTimers=new WeakMap();
@@ -331,8 +473,86 @@ function startGame(words){
   score=0;roundsCompleted=0;mode=randomItem(MODES);available=MAX_POINTS;locked=false;lastWord="";wordRepeatCount=0;
   $("startScreen").hidden=true;
   $("resultsScreen").hidden=true;
+  $("hangmanScreen").hidden=true;
   $("gameScreen").hidden=false;
   round(true);
+}
+function showMainMenu(){
+  $("gameScreen").hidden=true;
+  $("resultsScreen").hidden=true;
+  $("hangmanScreen").hidden=true;
+  $("startScreen").hidden=false;
+}
+function startHangman(){
+  $("startScreen").hidden=true;
+  $("gameScreen").hidden=true;
+  $("resultsScreen").hidden=true;
+  $("hangmanScreen").hidden=false;
+  startHangmanRound();
+}
+function startHangmanRound(){
+  const alternatives=CURRENT_WEEK_WORDS.filter(word=>word!==lastHangmanTarget);
+  hangmanTarget=randomItem(alternatives.length?alternatives:CURRENT_WEEK_WORDS);
+  lastHangmanTarget=hangmanTarget;
+  hangmanWrongGuesses=0;
+  hangmanGuessedLetters=new Set();
+  hangmanFinished=false;
+  $("hangmanMessage").textContent="";
+  $("hangmanActions").hidden=true;
+  const keyboard=$("hangmanKeyboard");
+  keyboard.innerHTML="";
+  "abcdefghijklmnopqrstuvwxyz".split("").forEach(letter=>{
+    const button=document.createElement("button");
+    button.className="hangman-letter";
+    button.type="button";
+    button.textContent=letter;
+    button.setAttribute("aria-label",letter.toUpperCase());
+    button.onclick=()=>guessHangmanLetter(letter,button);
+    keyboard.appendChild(button);
+  });
+  renderHangman();
+}
+function renderHangman(revealAll=false){
+  const wordDisplay=$("hangmanWord");
+  wordDisplay.innerHTML="";
+  [...hangmanTarget].forEach(letter=>{
+    const slot=document.createElement("span");
+    const visible=revealAll||!/^[a-z]$/i.test(letter)||hangmanGuessedLetters.has(letter);
+    slot.className="hangman-slot";
+    slot.textContent=visible?letter:"";
+    slot.setAttribute("aria-label",visible?letter:"blank");
+    wordDisplay.appendChild(slot);
+  });
+  $("hangmanStatus").textContent="Wrong guesses: "+hangmanWrongGuesses+" / "+HANGMAN_MAX_MISTAKES;
+  for(let part=1;part<=HANGMAN_MAX_MISTAKES;part++){
+    $("hangmanPart"+part).style.visibility=part<=hangmanWrongGuesses?"visible":"hidden";
+  }
+}
+function guessHangmanLetter(letter,button){
+  if(hangmanFinished||hangmanGuessedLetters.has(letter))return;
+  hangmanGuessedLetters.add(letter);
+  button.disabled=true;
+  if(hangmanTarget.includes(letter)){
+    button.classList.add("correct");
+    renderHangman();
+    if([...new Set(hangmanTarget.replace(/[^a-z]/gi,""))].every(guessed=>hangmanGuessedLetters.has(guessed))){
+      finishHangman(true);
+    }
+    return;
+  }
+  button.classList.add("incorrect");
+  hangmanWrongGuesses++;
+  renderHangman();
+  if(hangmanWrongGuesses===HANGMAN_MAX_MISTAKES)finishHangman(false);
+}
+function finishHangman(won){
+  hangmanFinished=true;
+  renderHangman(!won);
+  $("hangmanMessage").textContent=won?"You got it!":"Out of guesses! The word was "+hangmanTarget+".";
+  $("hangmanActions").hidden=false;
+  $("hangmanKeyboard").querySelectorAll("button").forEach(button=>button.disabled=true);
+  if(won){playWinSound();bottomConfettiBursts()}
+  else playLoseSound();
 }
 function finishGame(){
   const maximumScore=TOTAL_ROUNDS*MAX_POINTS;
@@ -340,18 +560,38 @@ function finishGame(){
   const perfect=score===maximumScore;
   $("gameScreen").hidden=true;
   $("resultsScreen").hidden=false;
-  $("resultTitle").textContent=perfect?"PERFECT!":percent>=80?"You Win!":"You Lose, Try Again";
+  const title=$("resultTitle");
+  title.classList.toggle("perfect",perfect);
+  if(perfect){
+    title.textContent="";
+    title.setAttribute("aria-label","PERFECT!");
+    [..."PERFECT!"].forEach((letter,i,letters)=>{
+      const span=document.createElement("span");
+      span.className="wave-letter";
+      span.setAttribute("aria-hidden","true");
+      span.style.setProperty("--i",i);
+      span.style.setProperty("--hue",Math.round(i/letters.length*360));
+      span.textContent=letter;
+      title.appendChild(span);
+    });
+  }else{
+    title.removeAttribute("aria-label");
+    title.textContent=percent>=80?"You Win!":"Not Quite! Give It Another Go!";
+  }
   $("resultScore").textContent="Final score: "+score+" / "+maximumScore+" ("+percent+"%)";
   if(perfect){confetti(280);playCelebrationSound()}
-  else if(percent>=80){confetti(score);playResultWinSound()}
+  else if(percent>=75){confetti(score);playResultWinSound()}
   else{confetti(score,["😞","😢","🙁"]);playLoseSound()}
 }
 function round(speakImmediately=false){
   target=nextWord();locked=false;spellPos=0;available=MAX_POINTS;
+  $("roundCount").textContent="Round "+Math.min(roundsCompleted+1,TOTAL_ROUNDS)+" of "+TOTAL_ROUNDS;
   showPoints();
   $("msg").textContent="";
   const c=$("choices");c.innerHTML="";
   c.classList.toggle("spell-keyboard",mode==="spell");
+  $("big").classList.toggle("replay",mode!=="look");
+  $("spelled").classList.toggle("spell-answer",mode==="spell");
   if(mode==="spell"){
     $("prompt").textContent="Listen to the word, then tap its letters.";
     $("big").textContent="👂";
@@ -376,7 +616,7 @@ function round(speakImmediately=false){
   clearTimeout(speechTimer);
   const wordToSpeak=target;
   if(speakImmediately){
-    speakWithSystemVoice(wordToSpeak);
+    speak(wordToSpeak);
     return;
   }
   speechTimer=setTimeout(()=>{
@@ -390,21 +630,24 @@ function pick(b,w){
 }
 function pickLetter(button,letter){
   if(locked)return;
+  while(spellPos<target.length&&!/[a-z]/i.test(target[spellPos]))spellPos++;
   if(letter===target[spellPos]){
     flashFeedback(button,"right");
     spellPos++;
+    while(spellPos<target.length&&!/[a-z]/i.test(target[spellPos]))spellPos++;
     $("spelled").textContent=target.slice(0,spellPos);
     if(spellPos===target.length)win();
   }else wrong(button);
 }
 $('hear').onclick=()=>{clearTimeout(speechTimer);speak(target)};
-$("thisWeekButton").onclick=()=>startGame(THIS_WEEKS_WORDS);
+$("big").onclick=()=>{if($("big").classList.contains("replay"))$('hear').click()};
+$("thisWeekButton").onclick=()=>startGame(CURRENT_WEEK_WORDS);
 $("practiceButton").onclick=()=>startGame(PRACTICE_WORDS);
+$("hangmanButton").onclick=startHangman;
 $("playAgainButton").onclick=()=>startGame(selectedWords);
-$("chooseWordsButton").onclick=()=>{
-  $("resultsScreen").hidden=true;
-  $("startScreen").hidden=false;
-};
+$("chooseWordsButton").onclick=showMainMenu;
+$("hangmanAgain").onclick=startHangmanRound;
+$("hangmanBack").onclick=showMainMenu;
 </script>
 </body>
 </html>
