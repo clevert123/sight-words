@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#a0e7ff">
 <title>Sight Words Game</title>
 <style>
-  body{display:flow-root;margin:0;font-family:"Comic Sans MS","Chalkboard SE",sans-serif;background:linear-gradient(#a0e7ff,#ffd6f6);min-height:100vh;text-align:center;color:#4b2e83}
+  html{min-height:100%;background:#ffd6f6 linear-gradient(#a0e7ff,#ffd6f6) top/100% 100vh no-repeat;background-size:100% 100lvh;overflow-x:hidden;overscroll-behavior:none}
+  body::before{content:"";position:fixed;top:0;left:0;right:0;height:100lvh;z-index:-1;background:linear-gradient(#a0e7ff,#ffd6f6)}
+  body{display:flow-root;box-sizing:border-box;margin:0;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);font-family:"Comic Sans MS","Chalkboard SE",sans-serif;min-height:100vh;min-height:100dvh;text-align:center;color:#4b2e83}
   .screen[hidden]{display:none}
+  #topEdge{position:fixed;z-index:-1;top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 140px);background:linear-gradient(#a0e7ff 60%,rgba(160,231,255,0));pointer-events:none}
   html,body,button{touch-action:manipulation}
   h1{margin:16px 0 4px;font-size:2.2rem}
   #startScreen,#resultsScreen{padding:8px 14px}
@@ -96,6 +100,7 @@
 </style>
 </head>
 <body>
+<div id="topEdge" aria-hidden="true"></div>
 <section id="startScreen" class="screen">
 <h1>⭐ Sight Words ⭐</h1>
 <p>Choose a word list</p>
