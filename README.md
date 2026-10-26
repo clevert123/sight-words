@@ -1,4 +1,4 @@
-# site-words
+# sight-words
 
 A fun sight-word game for kids. Open `index.html` in a browser.
 
