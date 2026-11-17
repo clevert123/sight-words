@@ -62,23 +62,34 @@
   #choices.spell-keyboard .letter{min-width:0;font-size:1.8rem;padding:10px 0;aspect-ratio:1/1.15}
   /* iPhone Duo optimizations - vertical (portrait) mode */
   @media(device-width: 540px) and (device-height: 720px) and (orientation: portrait) {
-    #choices.spell-keyboard{grid-template-columns:repeat(13,minmax(0,1fr));gap:12px;max-width:100%;padding:16px 6px}
-    #choices.spell-keyboard .letter{font-size:2.2rem;padding:12px 0;aspect-ratio:1/1}
+    h1{font-size:1.8rem;margin:4px 0 2px}
+    #score{font-size:1.3rem;line-height:1}
+    #roundCount{font-size:0.8rem;min-height:1rem;line-height:1}
+    #avail{font-size:1rem;min-height:1rem;line-height:1}
+    #prompt{font-size:1rem;margin:2px 0;line-height:1}
+    #big{font-size:2.6rem;margin:2px 0;min-height:3rem;line-height:1}
+    #spelled{font-size:2.4rem;line-height:1;min-height:2.5rem}
+    #msg{font-size:1rem;line-height:1;min-height:1.2rem}
+    #hear{font-size:1rem;padding:6px 10px;margin:2px}
+    .menu-button,.result-button{padding:12px 8px;font-size:1.1rem}
+    #choices.spell-keyboard{grid-template-columns:repeat(13,minmax(0,1fr));gap:10px;max-width:100%;padding:40px 4px 2px 4px;margin:0}
+    #choices.spell-keyboard .letter{font-size:2rem;padding:10px 0;aspect-ratio:1/1}
   }
   /* iPhone Duo optimizations - horizontal (landscape) mode */
   @media(device-width: 720px) and (device-height: 540px) and (orientation: landscape) {
-    h1{font-size:1.5rem;margin:8px 0 2px}
-    #score{font-size:1.3rem}
-    #roundCount{font-size:0.9rem}
-    #avail{font-size:1.1rem}
-    #prompt{font-size:1.1rem;margin:4px}
-    #big{font-size:2.5rem;margin:4px;min-height:3rem}
-    #spelled{font-size:2rem}
-    #hear{position:absolute;top:8px;left:8px;font-size:0.9rem;padding:4px 8px;margin:0}
-    .menu-button,.result-button{padding:12px 10px;font-size:1.1rem}
+    h1{font-size:1.3rem;margin:4px 0 0}
+    #score{font-size:1.1rem;line-height:1}
+    #roundCount{font-size:0.8rem;min-height:1rem;line-height:1}
+    #avail{font-size:0.9rem;min-height:1rem;line-height:1}
+    #prompt{font-size:1rem;margin:2px 0;line-height:1}
+    #big{font-size:2.2rem;margin:2px 0;min-height:2.5rem;line-height:1}
+    #spelled{font-size:1.8rem;line-height:1;min-height:2rem}
+    #msg{font-size:1.1rem;line-height:1;min-height:1.4rem}
+    #hear{position:absolute;top:4px;left:4px;font-size:0.85rem;padding:4px 6px;margin:0}
+    .menu-button,.result-button{padding:10px 8px;font-size:1rem}
     #gameScreen{display:flex;flex-direction:column}
-    #choices.spell-keyboard{grid-template-columns:repeat(13,minmax(0,1fr));gap:4px;max-width:100%;padding:48px 2px 2px 2px;margin-top:0}
-    #choices.spell-keyboard .letter{font-size:1.1rem;padding:2px 0;aspect-ratio:1/0.85}
+    #choices.spell-keyboard{grid-template-columns:repeat(13,minmax(0,1fr));gap:3px;max-width:100%;padding:40px 2px 2px 2px;margin-top:0}
+    #choices.spell-keyboard .letter{font-size:1rem;padding:1px 0;aspect-ratio:1/0.8}
   }
   @media(max-width:430px){#choices.spell-keyboard{grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}}
   @media(max-width:430px){
