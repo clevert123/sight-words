@@ -60,6 +60,26 @@
   #hear{font-size:1.3rem;padding:12px 22px;background:#ffcf33;margin:6px}
   #choices.spell-keyboard{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:16px;max-width:640px;margin:0 auto}
   #choices.spell-keyboard .letter{min-width:0;font-size:1.8rem;padding:10px 0;aspect-ratio:1/1.15}
+  /* iPhone Duo optimizations - vertical (portrait) mode */
+  @media(device-width: 540px) and (device-height: 720px) and (orientation: portrait) {
+    #choices.spell-keyboard{grid-template-columns:repeat(13,minmax(0,1fr));gap:12px;max-width:100%;padding:16px 6px}
+    #choices.spell-keyboard .letter{font-size:2.2rem;padding:12px 0;aspect-ratio:1/1}
+  }
+  /* iPhone Duo optimizations - horizontal (landscape) mode */
+  @media(device-width: 720px) and (device-height: 540px) and (orientation: landscape) {
+    h1{font-size:1.5rem;margin:8px 0 2px}
+    #score{font-size:1.3rem}
+    #roundCount{font-size:0.9rem}
+    #avail{font-size:1.1rem}
+    #prompt{font-size:1.1rem;margin:4px}
+    #big{font-size:2.5rem;margin:4px;min-height:3rem}
+    #spelled{font-size:2rem}
+    #hear{position:absolute;top:8px;left:8px;font-size:0.9rem;padding:4px 8px;margin:0}
+    .menu-button,.result-button{padding:12px 10px;font-size:1.1rem}
+    #gameScreen{display:flex;flex-direction:column}
+    #choices.spell-keyboard{grid-template-columns:repeat(13,minmax(0,1fr));gap:4px;max-width:100%;padding:48px 2px 2px 2px;margin-top:0}
+    #choices.spell-keyboard .letter{font-size:1.1rem;padding:2px 0;aspect-ratio:1/0.85}
+  }
   @media(max-width:430px){#choices.spell-keyboard{grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}}
   @media(max-width:430px){
     #listChoices,#resultActions{gap:10px;margin:18px auto}
@@ -159,6 +179,27 @@
   </div>
 </section>
 <script>
+// Detect iPhone Duo and add class if detected
+const isPhoneDuo = () => {
+  const ua = navigator.userAgent;
+  return /Android|Linux.*Build/.test(ua) && 
+         (screen.width === 540 && screen.height === 720 || 
+          screen.width === 720 && screen.height === 540);
+};
+
+if (isPhoneDuo()) {
+  document.documentElement.classList.add('iphone-duo');
+}
+
+// Handle orientation changes on iPhone Duo
+if (isPhoneDuo()) {
+  window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+      document.documentElement.classList.toggle('duo-landscape', window.innerWidth > window.innerHeight);
+    }, 100);
+  });
+}
+
 const WEEK_ONE_START_DATE="2026-09-06";
 const SIGHT_WORD_WEEKS=[
   ["up","we","a","and","go"],
