@@ -58,8 +58,55 @@
   .choice.wrong{background:#ffb3b3;animation:shake .4s}
   .choice.right{background:#a8f5a8}
   #hear{font-size:1.3rem;padding:12px 22px;background:#ffcf33;margin:6px}
-  #choices.spell-keyboard{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:16px;max-width:640px;margin:0 auto}
-  #choices.spell-keyboard .letter{min-width:0;font-size:1.8rem;padding:10px 0;aspect-ratio:1/1.15}
+  #choices.spell-keyboard{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:clamp(8px,2vw,16px);max-width:min(100%,640px);margin:0 auto;padding:clamp(8px,3vh,16px) clamp(4px,2vw,12px)}
+  #choices.spell-keyboard .letter{min-width:0;font-size:clamp(1.2rem,5vw,1.8rem);padding:clamp(6px,1.5vh,10px) 0;aspect-ratio:1/1.15}
+  
+  /* iPhone Duo specific optimizations */
+  html.iphone-duo{padding:max(0px,env(safe-area-inset-top)) max(0px,env(safe-area-inset-right)) max(0px,env(safe-area-inset-bottom)) max(0px,env(safe-area-inset-left))}
+  html.iphone-duo body{min-height:100dvh}
+  html.duo-portrait #choices.spell-keyboard{grid-template-columns:repeat(13,minmax(0,1fr));gap:8px;max-width:100%;padding:12px 4px 2px 4px;margin:0}
+  html.duo-portrait #choices.spell-keyboard .letter{font-size:1.6rem;padding:8px 0;aspect-ratio:1/1}
+  html.duo-portrait h1{font-size:1.6rem;margin:4px 0 2px}
+  html.duo-portrait #score{font-size:1.1rem}
+  html.duo-portrait #big{font-size:2.2rem;margin:2px 0}
+  html.duo-landscape #choices.spell-keyboard{grid-template-columns:repeat(13,minmax(0,1fr));gap:2px;max-width:100%;padding:30px 2px 2px 2px;margin:0}
+  html.duo-landscape #choices.spell-keyboard .letter{font-size:0.8rem;padding:1px 0;aspect-ratio:1/0.8}
+  html.duo-landscape h1{font-size:1.1rem;margin:2px 0 0}
+  html.duo-landscape #score{font-size:0.9rem}
+  html.duo-landscape #big{font-size:1.8rem;margin:1px 0}
+  html.duo-landscape #hear{max-width:140px}
+  
+  /* Responsive scaling for all devices */
+  @media(orientation: landscape) and (max-height: 600px) {
+    h1{font-size:clamp(1.2rem,4vw,1.8rem);margin:clamp(2px,1vh,4px) 0}
+    #score{font-size:clamp(0.9rem,3vw,1.3rem);line-height:1}
+    #roundCount{font-size:clamp(0.7rem,2vw,0.8rem);min-height:1rem;line-height:1}
+    #avail{font-size:clamp(0.8rem,2.5vw,0.9rem);min-height:1rem;line-height:1}
+    #prompt{font-size:clamp(0.8rem,2.5vw,1rem);margin:clamp(1px,0.5vh,2px) 0;line-height:1}
+    #big{font-size:clamp(1.8rem,5vw,2.2rem);margin:clamp(1px,0.5vh,2px) 0;min-height:clamp(2rem,8vh,2.5rem);line-height:1}
+    #spelled{font-size:clamp(1.4rem,4vw,1.8rem);line-height:1;min-height:clamp(1.6rem,6vh,2rem)}
+    #msg{font-size:clamp(0.8rem,2.5vw,1.1rem);line-height:1;min-height:clamp(1rem,3vh,1.4rem)}
+    #hear{font-size:clamp(0.7rem,2vw,0.85rem);padding:clamp(3px,0.8vh,4px) clamp(4px,1.5vw,6px);margin:0;max-width:200px;width:fit-content;align-self:flex-start}
+    .menu-button,.result-button{padding:clamp(8px,2vh,10px) clamp(6px,1.5vw,8px);font-size:clamp(0.8rem,2.5vw,1rem)}
+    #gameScreen{display:flex;flex-direction:column}
+    #choices.spell-keyboard{grid-template-columns:repeat(13,minmax(0,1fr));gap:clamp(2px,1vw,3px);max-width:100%;padding:clamp(35px,8vh,40px) clamp(2px,1vw,2px) clamp(1px,0.5vh,2px) clamp(2px,1vw,2px);margin:0}
+    #choices.spell-keyboard .letter{font-size:clamp(0.7rem,2vw,1rem);padding:clamp(1px,0.5vh,1px) 0;aspect-ratio:1/0.8}
+  }
+  
+  @media(orientation: portrait) and (min-width: 500px) and (min-height: 700px) {
+    h1{font-size:clamp(1.6rem,5vw,2.2rem);margin:clamp(2px,2vh,8px) 0 clamp(1px,1vh,4px)}
+    #score{font-size:clamp(1.1rem,4vw,1.8rem);line-height:1}
+    #roundCount{font-size:clamp(0.7rem,2vw,1.1rem);min-height:1rem;line-height:1}
+    #avail{font-size:clamp(0.9rem,3vw,1.4rem);min-height:1rem;line-height:1}
+    #prompt{font-size:clamp(0.9rem,3vw,1.4rem);margin:clamp(1px,1vh,8px) 0;line-height:1}
+    #big{font-size:clamp(2.2rem,6vw,4rem);margin:clamp(1px,1vh,8px) 0;min-height:clamp(2.5rem,10vh,5rem);line-height:1}
+    #spelled{font-size:clamp(2rem,5vw,3rem);line-height:1;min-height:clamp(2rem,8vh,3.5rem)}
+    #msg{font-size:clamp(0.9rem,2.5vw,1.1rem);line-height:1;min-height:clamp(1rem,3vh,1.5rem)}
+    #hear{font-size:clamp(0.9rem,2.5vw,1.3rem);padding:clamp(6px,1.5vh,12px) clamp(10px,2.5vw,22px);margin:clamp(2px,1vh,6px)}
+    .menu-button,.result-button{padding:clamp(10px,2.5vh,18px) clamp(8px,2vw,14px);font-size:clamp(0.95rem,3vw,1.5rem)}
+    #choices.spell-keyboard{grid-template-columns:repeat(13,minmax(0,1fr));gap:clamp(8px,2vw,12px);max-width:100%;padding:clamp(35px,8vh,40px) clamp(3px,1.5vw,6px) clamp(1px,0.5vh,2px) clamp(3px,1.5vw,6px);margin:0}
+    #choices.spell-keyboard .letter{font-size:clamp(1.6rem,4vw,2.2rem);padding:clamp(8px,2vh,12px) 0;aspect-ratio:1/1}
+  }
   @media(max-width:430px){#choices.spell-keyboard{grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}}
   @media(max-width:430px){
     #listChoices,#resultActions{gap:10px;margin:18px auto}
@@ -159,6 +206,42 @@
   </div>
 </section>
 <script>
+// Detect iPhone Duo and add class if detected
+const isPhoneDuo = () => {
+  const ua = navigator.userAgent;
+  // Check for Duo in user agent or screen dimensions matching Duo (540x720 or 720x540)
+  const isDuoUA = /Duo/.test(ua);
+  const isDuoScreen = (screen.width === 540 && screen.height === 720) || 
+                       (screen.width === 720 && screen.height === 540) ||
+                       (window.innerWidth === 540 && window.innerHeight === 720) ||
+                       (window.innerWidth === 720 && window.innerHeight === 540);
+  return isDuoUA || isDuoScreen;
+};
+
+if (isPhoneDuo()) {
+  document.documentElement.classList.add('iphone-duo');
+  console.log('iPhone Duo detected! Viewport:', window.innerWidth, 'x', window.innerHeight);
+}
+
+// Handle orientation changes on iPhone Duo
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => {
+    if (isPhoneDuo()) {
+      const isLandscape = window.innerWidth > window.innerHeight;
+      document.documentElement.classList.toggle('duo-landscape', isLandscape);
+      document.documentElement.classList.toggle('duo-portrait', !isLandscape);
+      console.log('Orientation changed - Landscape:', isLandscape, 'Viewport:', window.innerWidth, 'x', window.innerHeight);
+    }
+  }, 100);
+});
+
+// Also run on load
+if (isPhoneDuo()) {
+  const isLandscape = window.innerWidth > window.innerHeight;
+  document.documentElement.classList.toggle('duo-landscape', isLandscape);
+  document.documentElement.classList.toggle('duo-portrait', !isLandscape);
+}
+
 const WEEK_ONE_START_DATE="2026-09-06";
 const SIGHT_WORD_WEEKS=[
   ["up","we","a","and","go"],
