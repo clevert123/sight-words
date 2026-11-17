@@ -726,6 +726,17 @@ function pickLetter(button,letter){
     if(spellPos===target.length)win();
   }else wrong(button);
 }
+// Handle keyboard input for spelling mode
+document.addEventListener('keydown',e=>{
+  if(mode!=="spell"||locked)return;
+  const letter=e.key.toLowerCase();
+  if(/^[a-z]$/.test(letter)){
+    e.preventDefault();
+    const buttons=document.querySelectorAll('.choice.letter');
+    const btn=[...buttons].find(b=>b.textContent===letter);
+    if(btn)pickLetter(btn,letter);
+  }
+});
 $('hear').onclick=()=>{clearTimeout(speechTimer);speak(target)};
 $("big").onclick=()=>{if($("big").classList.contains("replay"))$('hear').click()};
 $("thisWeekButton").onclick=()=>startGame(CURRENT_WEEK_WORDS);
