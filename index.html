@@ -44,7 +44,7 @@
   #hangmanActions .result-button{width:auto;flex:1;max-width:220px}
   #score{font-size:1.8rem}
   #avail{font-size:1.4rem;min-height:2rem}
-  #spelled{font-size:3rem;letter-spacing:.3rem;min-height:3.5rem;color:#2a9d2a}
+  #spelled{font-size:3rem;letter-spacing:.3rem;min-height:3.5rem;color:#2a9d2a;cursor:pointer;user-select:none}
   #spelled.spell-answer{box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:min(440px,calc(100% - 32px));min-height:4.25rem;margin:10px auto 14px;padding:6px 12px;border:3px dashed #1f7a3a;border-radius:8px;background:#fff}
   .choice:disabled,.menu-button:disabled{opacity:.6;cursor:default}
   .letter{box-sizing:border-box;width:100%;min-width:0;padding:10px 0;aspect-ratio:1}
@@ -193,6 +193,7 @@
 <div id="prompt"></div>
 <div id="big"></div>
 <div id="spelled" aria-live="polite" aria-label="Word being spelled"></div>
+<input id="spellInput" type="text" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" inputmode="none" autocomplete="off" aria-hidden="true">
 <button id="hear">🔊 Hear the word</button>
 <div id="msg"></div>
 <div id="choices"></div>
@@ -737,6 +738,25 @@ document.addEventListener('keydown',e=>{
     if(btn)pickLetter(btn,letter);
   }
 });
+// Handle tapping on the spelled box to show keyboard
+$('spelled').onclick=()=>{
+  if(mode==="spell"&&!locked){
+    $('spellInput').focus();
+  }
+};
+// Handle input element for keyboard typing
+$('spellInput').oninput=()=>{
+  const val=$('spellInput').value.toLowerCase();
+  if(val){
+    const letter=val[val.length-1];
+    if(/^[a-z]$/.test(letter)){
+      const buttons=document.querySelectorAll('.choice.letter');
+      const btn=[...buttons].find(b=>b.textContent===letter);
+      if(btn)pickLetter(btn,letter);
+    }
+    $('spellInput').value='';
+  }
+};
 $('hear').onclick=()=>{clearTimeout(speechTimer);speak(target)};
 $("big").onclick=()=>{if($("big").classList.contains("replay"))$('hear').click()};
 $("thisWeekButton").onclick=()=>startGame(CURRENT_WEEK_WORDS);
